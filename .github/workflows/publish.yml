@@ -12,8 +12,14 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: yarn run lint
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: yarn run build
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - uses: JS-DevTools/npm-publish@v1
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           token: ${{ secrets.NPM_TOKEN }}
           access: public
