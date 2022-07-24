@@ -1,6 +1,6 @@
 {
   "name": "@arrimo/typeorm-factory",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Factory for typeorm",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

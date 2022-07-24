@@ -1,15 +1,26 @@
-import {FindOneOptions, getRepository} from 'typeorm';
+import {DataSource,  FindOneOptions, Repository} from 'typeorm';
 import { SubFactory } from './subfactory';
 import { Constructable } from './types';
 import { Sequence } from './sequence';
 import { FactoryStorage } from './factory-storage';
 
 export abstract class Factory<T> {
+
+  private static dataSource: DataSource;
+
+  public static setDataSource(ds: DataSource) {
+    this.dataSource = ds;
+  }
+
   abstract get entity(): Constructable<T>;
 
-  constructor() {}
+  private get repository(): Repository<T> {
+    return Factory.dataSource.getRepository(this.entity);
+  }
+
 
   async create(values: Partial<T> = {}): Promise<T> {
+
     if (this.getOrCreate().length !== 0) {
       const existingEntity = await this.getExistingEntity(values);
       if (existingEntity) {
@@ -18,7 +29,7 @@ export abstract class Factory<T> {
     }
 
     const entity: T = await this.createEntity(values);
-    const savedEntity = getRepository(this.entity).save(entity);
+    const savedEntity = this.repository.save(entity);
 
     const storage = FactoryStorage.storage;
     const postGenerators = storage.getPostGenerators(this.constructor.name);
@@ -32,7 +43,7 @@ export abstract class Factory<T> {
   async createMany(count: number, values: Partial<T> = {}): Promise<T[]> {
     const entities: T[] = await Promise.all(Array.from({ length: count }).map(() => this.createEntity(values)));
 
-    return getRepository(this.entity).save(entities);
+    return this.repository.save(entities);
   }
 
   protected getOrCreate(): string[] {
@@ -46,7 +57,7 @@ export abstract class Factory<T> {
       whereClauses[key] = values[key as keyof T] ? values[key as keyof T] : (this as any)[key];
     });
 
-    return getRepository(this.entity).findOne({ where: whereClauses } as FindOneOptions<T>);
+    return this.repository.findOne({ where: whereClauses } as FindOneOptions<T>);
   }
 
   private async createEntity(values: Partial<T>): Promise<T> {
