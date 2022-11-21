@@ -18,8 +18,11 @@ export abstract class Factory<T> {
     return Factory.dataSource.getRepository(this.entity);
   }
 
+  async clear(): Promise<void> {
+    return this.repository.clear();
+  }
 
-  async create(values: Partial<T> = {}): Promise<T> {
+  async create(values: Partial<T> = {} as Partial<T>): Promise<T> {
 
     if (this.getOrCreate().length !== 0) {
       const existingEntity = await this.getExistingEntity(values);
@@ -40,7 +43,7 @@ export abstract class Factory<T> {
     return savedEntity;
   }
 
-  async createMany(count: number, values: Partial<T> = {}): Promise<T[]> {
+  async createMany(count: number, values: Partial<T> = {} as Partial<T>): Promise<T[]> {
     const entities: T[] = await Promise.all(Array.from({ length: count }).map(() => this.createEntity(values)));
 
     return this.repository.save(entities);
