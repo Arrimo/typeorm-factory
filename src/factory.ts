@@ -19,7 +19,7 @@ export abstract class Factory<T> {
   }
 
   async clear(): Promise<void> {
-    await this.repository.delete("1");
+    await this.repository.delete("id IS NOT NULL");
   }
 
   async create(values: Partial<T> = {} as Partial<T>): Promise<T> {
