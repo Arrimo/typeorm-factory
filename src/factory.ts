@@ -1,4 +1,4 @@
-import {DataSource,  FindOneOptions, Repository} from 'typeorm';
+import {DataSource, FindOneOptions, In, Repository} from 'typeorm';
 import { SubFactory } from './subfactory';
 import { Constructable } from './types';
 import { Sequence } from './sequence';
@@ -19,7 +19,10 @@ export abstract class Factory<T> {
   }
 
   async clear(): Promise<void> {
-    await this.repository.delete("id IS NOT NULL");
+    const items = await this.repository.find({});
+    await this.repository.delete({
+      id: In(items.map(x => x.id))
+    })
   }
 
   async create(values: Partial<T> = {} as Partial<T>): Promise<T> {
