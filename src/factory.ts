@@ -1,4 +1,4 @@
-import {DataSource, FindOneOptions, In, Repository} from 'typeorm';
+import {DataSource, FindOneOptions, FindOptionsWhere, In, Repository} from 'typeorm';
 import { SubFactory } from './subfactory';
 import { Constructable } from './types';
 import { Sequence } from './sequence';
@@ -18,11 +18,11 @@ export abstract class Factory<T> {
     return Factory.dataSource.getRepository(this.entity);
   }
 
-  async clear(): Promise<void> {
+  async clear(idKey: keyof T = "id" as any): Promise<void> {
     const items = await this.repository.find({});
     await this.repository.delete({
-      id: In(items.map(x => x.id))
-    })
+      [idKey]: In(items.map(x => x[idKey]))
+    } as FindOptionsWhere<any>)
   }
 
   async create(values: Partial<T> = {} as Partial<T>): Promise<T> {
